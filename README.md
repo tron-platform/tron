@@ -1,6 +1,6 @@
 # Tron - Platform as a Service
 
-PaaS platform built on top of Kubernetes that simplifies application deployment and management.
+An Internal Developer Platform that simplifies application delivery on Kubernetes by providing a clean abstraction for workloads, networking, scaling, and exposure.
 
 ## 📸 Platform Overview
 

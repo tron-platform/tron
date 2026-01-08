@@ -19,8 +19,8 @@ def reset_alembic_history():
     """Reseta o histórico do Alembic no banco de dados."""
     # Obter URL do banco de dados das variáveis de ambiente
     DB_HOST = os.getenv('DB_HOST', 'localhost')
-    DB_USER = os.getenv('DB_USER', 'paas')
-    DB_PASSWORD = os.getenv('DB_PASSWORD', 'paas')
+    DB_USER = os.getenv('DB_USER', 'tron')
+    DB_PASSWORD = os.getenv('DB_PASSWORD', 'tron')
     DB_NAME = os.getenv('DB_NAME', 'api')
     DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}/{DB_NAME}"
 

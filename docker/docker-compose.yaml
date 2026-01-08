@@ -1,7 +1,7 @@
 x-shared-env: &shared_envs
     DB_HOST: database
-    DB_USER: paas
-    DB_PASSWORD: paas
+    DB_USER: tron
+    DB_PASSWORD: tron
     DB_PORT: 5432
     DEBUG: "True"
 
@@ -25,8 +25,8 @@ services:
   database:
     image: postgres:14.1
     environment:
-      - POSTGRES_USER=paas
-      - POSTGRES_PASSWORD=paas
+      - POSTGRES_USER=tron
+      - POSTGRES_PASSWORD=tron
       - POSTGRES_MULTIPLE_DATABASES=api,portal
     ports:
       - "5432:5432"
@@ -34,7 +34,7 @@ services:
       - ${PWD}/volumes/postgres:/var/lib/postgresql/data
       - ${PWD}/docker/db-entrypoint:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paas -d api -h localhost"]
+      test: ["CMD-SHELL", "pg_isready -U tron -d api -h localhost"]
       interval: 3s
       timeout: 10s
       retries: 10
