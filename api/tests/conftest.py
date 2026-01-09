@@ -2,15 +2,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest.mock import MagicMock
-from app.database import Base
-
-import app.models.namespace as NamespaceModel
-import app.models.application_components as WebappDeployModel
-import app.models.environment as EnvironmentModel
-import app.models.workload as WorkloadModel
-import app.models.cluster_instance as InstanceModel
-import app.models.cluster as ClusterModel
-import app.models.settings as SettingsrModel
+from app.shared.database.database import Base
 
 @pytest.fixture()
 def mock_db():

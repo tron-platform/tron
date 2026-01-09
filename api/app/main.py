@@ -2,21 +2,36 @@ import importlib
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import *
-from .database import Base, engine
+from app.shared.database.database import Base, engine
+# Also import Base from old database to ensure compatibility
+from app.database import Base as OldBase
+# Ensure both Bases are the same instance
+assert Base is OldBase, "Base instances must be the same for SQLAlchemy relationships to work"
 
 # Import all models to ensure they are registered with SQLAlchemy
-import app.models.cluster
-import app.models.environment
-import app.models.cluster_instance
-import app.models.instance
-import app.models.settings
-import app.models.template
-import app.models.component_template_config
-import app.models.application
-import app.models.application_components
-import app.models.user
-import app.models.token
+# Import order matters for SQLAlchemy relationships
+# 1. Base models first (no dependencies)
+from app.users.infra.user_model import User
+from app.auth.infra.token_model import Token
+from app.applications.infra.application_model import Application
+from app.environments.infra.environment_model import Environment
+from app.templates.infra.template_model import Template
+
+# 2. Models that depend on above
+from app.instances.infra.instance_model import Instance
+from app.settings.infra.settings_model import Settings
+
+# 3. Models that depend on multiple above - IMPORTANT: ApplicationComponent before ClusterInstance
+from app.webapps.infra.application_component_model import ApplicationComponent
+
+# Import ClusterInstance from new structure (uses same Base now)
+from app.shared.infra.cluster_instance_model import ClusterInstance
+
+# 4. Cluster must be imported after ClusterInstance for relationships to work
+from app.clusters.infra.cluster_model import Cluster
+
+# Import component_template_config model
+from app.templates.infra.component_template_config_model import ComponentTemplateConfig
 
 Base.metadata.create_all(bind=engine)
 
@@ -51,22 +66,39 @@ app.add_middleware(
     allow_headers=CORS_ALLOW_HEADERS,
 )
 
-ROUTERS_PATH = "./app/routers"
+# Import new structure routers
+from app.applications.api.application_handlers import router as applications_router
+from app.instances.api.instance_handlers import router as instances_router
+from app.environments.api.environment_handlers import router as environments_router
+from app.clusters.api.cluster_handlers import router as clusters_router
+from app.templates.api.template_handlers import router as templates_router
+from app.templates.api.component_template_config_handlers import router as component_template_config_router
+from app.users.api.user_handlers import router as users_router
+from app.auth.api.auth_handlers import router as auth_router
+from app.auth.api.token_handlers import router as tokens_router
+from app.settings.api.settings_handlers import router as settings_router
+from app.dashboard.api.dashboard_handlers import router as dashboard_router
+from app.webapps.api.webapp_handlers import router as webapps_router
+from app.workers.api.worker_handlers import router as workers_router
+from app.cron.api.cron_handlers import router as crons_router
 
+# Include new structure routers
+app.include_router(applications_router)
+app.include_router(instances_router)
+app.include_router(environments_router)
+app.include_router(clusters_router)
+app.include_router(templates_router)
+app.include_router(component_template_config_router)
+app.include_router(users_router)
+app.include_router(auth_router)
+app.include_router(tokens_router)
+app.include_router(settings_router)
+app.include_router(dashboard_router)
+app.include_router(webapps_router)
+app.include_router(workers_router)
+app.include_router(crons_router)
 
-def include_all_routers(app: FastAPI):
-    for file in os.listdir(ROUTERS_PATH):
-        if file.endswith(".py") and file != "__init__.py":
-            module_name = file[:-3]
-            module_path = f"app.routers.{module_name}"
-
-            module = importlib.import_module(module_path)
-
-            if hasattr(module, "router"):
-                app.include_router(module.router, tags=[module_name])
-
-
-include_all_routers(app)
+# Legacy routers removed - all features migrated to new structure
 
 # Fix ReDoc CDN URL - use stable version instead of @next
 from fastapi.openapi.docs import get_redoc_html

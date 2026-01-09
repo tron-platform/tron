@@ -9,8 +9,8 @@ import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
-from app.models.user import User, UserRole
+from app.shared.database.database import SessionLocal
+from app.users.infra.user_model import User, UserRole
 import bcrypt
 
 

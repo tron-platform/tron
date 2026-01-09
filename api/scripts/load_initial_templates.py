@@ -12,11 +12,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy.orm import Session
-from app.database import SessionLocal
+from app.shared.database.database import SessionLocal
 from uuid import uuid4
 
-import app.models.template as TemplateModel
-import app.models.component_template_config as ComponentTemplateConfigModel
+from app.templates.infra.template_model import Template as TemplateModel
+from app.templates.infra.component_template_config_model import ComponentTemplateConfig as ComponentTemplateConfigModel
 
 
 def read_template_file(file_path: Path) -> str:
@@ -166,10 +166,10 @@ def load_templates(db: Session):
     for template_data in templates_data:
         # Verificar se o template já existe (por nome e categoria)
         existing_template = (
-            db.query(TemplateModel.Template)
+            db.query(TemplateModel)
             .filter(
-                TemplateModel.Template.name == template_data["name"],
-                TemplateModel.Template.category == template_data["category"]
+                TemplateModel.name == template_data["name"],
+                TemplateModel.category == template_data["category"]
             )
             .first()
         )
@@ -179,10 +179,10 @@ def load_templates(db: Session):
             # Verificar se já existe component_template_config para este template
             # A constraint única é por component_type e template_id
             existing_config = (
-                db.query(ComponentTemplateConfigModel.ComponentTemplateConfig)
+                db.query(ComponentTemplateConfigModel)
                 .filter(
-                    ComponentTemplateConfigModel.ComponentTemplateConfig.template_id == existing_template.id,
-                    ComponentTemplateConfigModel.ComponentTemplateConfig.component_type == template_data["category"]
+                    ComponentTemplateConfigModel.template_id == existing_template.id,
+                    ComponentTemplateConfigModel.component_type == template_data["category"]
                 )
                 .first()
             )
@@ -190,7 +190,7 @@ def load_templates(db: Session):
             if not existing_config:
                 # Criar a configuração se não existir
                 try:
-                    config = ComponentTemplateConfigModel.ComponentTemplateConfig(
+                    config = ComponentTemplateConfigModel(
                         uuid=uuid4(),
                         component_type=template_data["category"],
                         template_id=existing_template.id,
@@ -221,7 +221,7 @@ def load_templates(db: Session):
         content = read_template_file(template_data["file_path"])
 
         # Criar o template
-        new_template = TemplateModel.Template(
+        new_template = TemplateModel(
             uuid=uuid4(),
             name=template_data["name"],
             description=template_data["description"],
@@ -234,7 +234,7 @@ def load_templates(db: Session):
         db.flush()  # Flush para obter o ID
 
         # Criar a configuração de component_template_config
-        config = ComponentTemplateConfigModel.ComponentTemplateConfig(
+        config = ComponentTemplateConfigModel(
             uuid=uuid4(),
             component_type=template_data["category"],
             template_id=new_template.id,

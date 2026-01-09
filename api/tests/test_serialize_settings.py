@@ -1,7 +1,7 @@
 
 import pytest
 from unittest.mock import MagicMock
-from app.helpers.serializers import serialize_settings
+from app.shared.serializers.serializers import serialize_settings
 
 def test_serialize_settings():
 

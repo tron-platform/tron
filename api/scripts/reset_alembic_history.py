@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from sqlalchemy import create_engine, text
-from app.database import SessionLocal
+from app.shared.database.database import SessionLocal
 import os
 
 def reset_alembic_history():

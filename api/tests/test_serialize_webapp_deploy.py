@@ -1,50 +1,81 @@
 
 import pytest
 from unittest.mock import MagicMock
-from app.helpers.serializers import serialize_webapp_deploy
+from app.shared.serializers.serializers import serialize_webapp_deploy
 
 def test_serialize_webapp_deploy():
 
+    # Mock ApplicationComponent with new structure
     mock_webapp_deploy = MagicMock()
 
-    mock_webapp_deploy.webapp.name = "test-webapp"
-    mock_webapp_deploy.webapp.uuid = "123e4567-e89b-12d3-a456-426614174000"
-    mock_webapp_deploy.webapp.namespace.name = "test-namespace"
-    mock_webapp_deploy.webapp.namespace.uuid = "123e4567-e89b-12d3-a456-426614174111"
-    mock_webapp_deploy.environment.name = "staging"
-    mock_webapp_deploy.workload.name = "general"
-    mock_webapp_deploy.image = "nginx"
-    mock_webapp_deploy.version = "1.0.0"
-    mock_webapp_deploy.cpu_scaling_threshold = 80
-    mock_webapp_deploy.memory_scaling_threshold = 70
-    mock_webapp_deploy.envs = [{"chave": "valor"}]
-    mock_webapp_deploy.secrets = []
-    mock_webapp_deploy.custom_metrics = {"enabled": False, "path": "/metrics", "port": 8080}
-    mock_webapp_deploy.healthcheck = {"path": "/healthcheck","protocol": "http","port": 80,"timeout": 5,"interval": 31,"initial_interval": 30,"failure_threshold": 2}
-    mock_webapp_deploy.endpoints = [{"source_protocol": "http","source_port": 80,"dest_protocol": "http","dest_port": 80}]
-    mock_webapp_deploy.cpu = "0.25"
-    mock_webapp_deploy.memory = 128
+    # Component attributes
+    mock_webapp_deploy.name = "test-webapp"
+    mock_webapp_deploy.uuid = "123e4567-e89b-12d3-a456-426614174000"
+    mock_webapp_deploy.url = None
+    mock_webapp_deploy.enabled = True
+
+    # Type enum
+    from app.webapps.infra.application_component_model import WebappType
+    mock_webapp_deploy.type = WebappType.webapp
+
+    # Instance attributes
+    mock_instance = MagicMock()
+    mock_instance.image = "nginx"
+    mock_instance.version = "1.0.0"
+
+    # Application attributes
+    mock_application = MagicMock()
+    mock_application.name = "test-app"
+    mock_application.uuid = "223e4567-e89b-12d3-a456-426614174001"
+    mock_instance.application = mock_application
+
+    # Environment attributes
+    mock_environment = MagicMock()
+    mock_environment.name = "staging"
+    mock_environment.uuid = "323e4567-e89b-12d3-a456-426614174002"
+    mock_instance.environment = mock_environment
+
+    mock_webapp_deploy.instance = mock_instance
+
+    # Settings
+    mock_webapp_deploy.settings = {
+        "cpu": 0.25,
+        "memory": 128,
+        "cpu_scaling_threshold": 80,
+        "memory_scaling_threshold": 70,
+        "envs": [{"key": "chave", "value": "valor"}],
+        "secrets": [],
+        "custom_metrics": {"enabled": False, "path": "/metrics", "port": 8080},
+        "healthcheck": {
+            "path": "/healthcheck",
+            "protocol": "http",
+            "port": 80,
+            "timeout": 5,
+            "interval": 31,
+            "initial_interval": 30,
+            "failure_threshold": 2
+        },
+        "exposure": {
+            "type": "http",
+            "port": 80,
+            "visibility": "cluster"
+        }
+    }
 
     result = serialize_webapp_deploy(mock_webapp_deploy)
 
-    expected_result = {
-        "webapp_name": "test-webapp",
-        "webapp_uuid": "123e4567-e89b-12d3-a456-426614174000",
-        "namespace_name": "test-namespace",
-        "namespace_uuid": "123e4567-e89b-12d3-a456-426614174111",
-        "environment": "staging",
-        "workload": "general",
-        "image": "nginx",
-        "version": "1.0.0",
-        "cpu_scaling_threshold": 80,
-        "memory_scaling_threshold": 70,
-        "envs": [{"chave": "valor"}],
-        "secrets": [],
-        "custom_metrics": {"enabled": False, "path": "/metrics", "port": 8080},
-        "healthcheck": {"path": "/healthcheck","protocol": "http","port": 80,"timeout": 5,"interval": 31,"initial_interval": 30,"failure_threshold": 2},
-        "endpoints": [{"source_protocol": "http","source_port": 80,"dest_protocol": "http","dest_port": 80}],
-        "cpu": "0.25",
-        "memory": 128
-    }
-
-    assert result == expected_result
+    # Verify new format
+    assert result["component_name"] == "test-webapp"
+    assert result["component_uuid"] == "123e4567-e89b-12d3-a456-426614174000"
+    assert result["component_type"] == "webapp"
+    assert result["application_name"] == "test-app"
+    assert result["application_uuid"] == "223e4567-e89b-12d3-a456-426614174001"
+    assert result["environment"] == "staging"
+    assert result["environment_uuid"] == "323e4567-e89b-12d3-a456-426614174002"
+    assert result["image"] == "nginx"
+    assert result["version"] == "1.0.0"
+    assert result["url"] is None
+    assert result["enabled"] is True
+    assert "settings" in result
+    assert result["settings"]["cpu"] == 0.25
+    assert result["settings"]["memory"] == 128

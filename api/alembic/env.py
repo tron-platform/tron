@@ -6,15 +6,18 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.database import Base
-import app.models.cluster
-import app.models.environment
-import app.models.cluster_instance
-import app.models.instance
-import app.models.settings
-import app.models.template
-import app.models.component_template_config
-import app.models.application
-import app.models.application_components
+# Import all models from new structure to ensure they're registered with SQLAlchemy
+from app.applications.infra.application_model import Application
+from app.instances.infra.instance_model import Instance
+from app.environments.infra.environment_model import Environment
+from app.clusters.infra.cluster_model import Cluster
+from app.templates.infra.template_model import Template
+from app.templates.infra.component_template_config_model import ComponentTemplateConfig
+from app.settings.infra.settings_model import Settings
+from app.users.infra.user_model import User
+from app.auth.infra.token_model import Token
+from app.webapps.infra.application_component_model import ApplicationComponent
+from app.shared.infra.cluster_instance_model import ClusterInstance
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

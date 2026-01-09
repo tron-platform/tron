@@ -1,45 +1,48 @@
 import pytest
 from unittest.mock import patch, MagicMock
-from app.services.kubernetes.application_component_manager import (
+from app.shared.k8s.application_component_manager import (
     KubernetesApplicationComponentManager,
 )
 
 
 def test_instance_management():
 
-    webapp_deploy_serialized = {
-        "webapp_name": "teste",
-        "webapp_uuid": "4329360f-19fe-4674-813f-4ab7146ac0b3",
-        "namespace_name": "teste-namespace",
-        "namespace_uuid": "a8ef62c3-2860-461e-ad74-dc1472691f2d",
+    # Updated to match new serialize_application_component format
+    application_component_serialized = {
+        "component_name": "teste",
+        "component_uuid": "4329360f-19fe-4674-813f-4ab7146ac0b3",
+        "component_type": "webapp",
+        "application_name": "teste-app",
+        "application_uuid": "a8ef62c3-2860-461e-ad74-dc1472691f2d",
         "environment": "staging",
-        "workload": "general",
+        "environment_uuid": "b9ef62c3-2860-461e-ad74-dc1472691f2e",
         "image": "nginx",
         "version": "1.0.0",
-        "cpu_scaling_threshold": 80,
-        "memory_scaling_threshold": 80,
-        "envs": [{"key", "value"}],
-        "secrets": [],
-        "custom_metrics": {"enabled": False, "path": "/metrics", "port": 0},
-        "healthcheck": {
-            "path": "/healthcheck",
-            "protocol": "http",
-            "port": 80,
-            "timeout": 5,
-            "interval": 31,
-            "initial_interval": 30,
-            "failure_threshold": 2,
-        },
-        "endpoints": [
-            {
-                "source_protocol": "http",
-                "source_port": 80,
-                "dest_protocol": "http",
-                "dest_port": 80,
+        "url": None,
+        "enabled": True,
+        "settings": {
+            "cpu": 0.25,
+            "memory": 128,
+            "cpu_scaling_threshold": 80,
+            "memory_scaling_threshold": 80,
+            "envs": [{"key": "value"}],
+            "secrets": [],
+            "custom_metrics": {"enabled": False, "path": "/metrics", "port": 0},
+            "healthcheck": {
+                "path": "/healthcheck",
+                "protocol": "http",
+                "port": 80,
+                "timeout": 5,
+                "interval": 31,
+                "initial_interval": 30,
+                "failure_threshold": 2,
+            },
+            "exposure": {
+                "type": "http",
+                "port": 80,
+                "visibility": "cluster"
             }
-        ],
-        "cpu": 0.25,
-        "memory": 128
+        }
     }
 
     # Mock database session
@@ -50,9 +53,22 @@ def test_instance_management():
     mock_template.content = "kind: Deployment\napiVersion: apps/v1\nmetadata:\n  name: test"
     mock_template.name = "test-template"
 
-    with patch('app.services.component_template_config.ComponentTemplateConfigService.get_templates_for_component', return_value=[mock_template]):
+    # Mock the repositories and service
+    with patch('app.shared.k8s.application_component_manager.ComponentTemplateConfigRepository') as mock_config_repo_class, \
+         patch('app.shared.k8s.application_component_manager.TemplateRepository') as mock_template_repo_class, \
+         patch('app.shared.k8s.application_component_manager.ComponentTemplateConfigService') as mock_service_class:
+
+        mock_config_repo = MagicMock()
+        mock_template_repo = MagicMock()
+        mock_config_repo_class.return_value = mock_config_repo
+        mock_template_repo_class.return_value = mock_template_repo
+
+        mock_service = MagicMock()
+        mock_service.get_templates_for_component_type.return_value = [mock_template]
+        mock_service_class.return_value = mock_service
+
         kubernetes_payload = KubernetesApplicationComponentManager.instance_management(
-            webapp_deploy_serialized, "webapp", db=mock_db
+            application_component_serialized, "webapp", db=mock_db
         )
 
     kinds = []
