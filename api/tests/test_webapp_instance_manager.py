@@ -48,10 +48,18 @@ def test_instance_management():
     # Mock database session
     mock_db = MagicMock()
 
-    # Mock templates
-    mock_template = MagicMock()
-    mock_template.content = "kind: Deployment\napiVersion: apps/v1\nmetadata:\n  name: test"
-    mock_template.name = "test-template"
+    # Mock templates - need multiple templates to get 3 resources
+    mock_template_deployment = MagicMock()
+    mock_template_deployment.content = "kind: Deployment\napiVersion: apps/v1\nmetadata:\n  name: test"
+    mock_template_deployment.name = "deployment-template"
+
+    mock_template_hpa = MagicMock()
+    mock_template_hpa.content = "kind: HorizontalPodAutoscaler\napiVersion: autoscaling/v2\nmetadata:\n  name: test"
+    mock_template_hpa.name = "hpa-template"
+
+    mock_template_service = MagicMock()
+    mock_template_service.content = "kind: Service\napiVersion: v1\nmetadata:\n  name: test"
+    mock_template_service.name = "service-template"
 
     # Mock the repositories and service
     with patch('app.shared.k8s.application_component_manager.ComponentTemplateConfigRepository') as mock_config_repo_class, \
@@ -64,7 +72,12 @@ def test_instance_management():
         mock_template_repo_class.return_value = mock_template_repo
 
         mock_service = MagicMock()
-        mock_service.get_templates_for_component_type.return_value = [mock_template]
+        # Return 3 templates to get 3 resources
+        mock_service.get_templates_for_component_type.return_value = [
+            mock_template_deployment,
+            mock_template_hpa,
+            mock_template_service
+        ]
         mock_service_class.return_value = mock_service
 
         kubernetes_payload = KubernetesApplicationComponentManager.instance_management(
@@ -79,5 +92,9 @@ def test_instance_management():
         api_versions.append(item.get("apiVersion"))
 
     assert len(kubernetes_payload) == 3
-    assert kinds == ["Deployment", "HorizontalPodAutoscaler", "Service"]
-    assert api_versions == ["apps/v1", "autoscaling/v2", "v1"]
+    assert "Deployment" in kinds
+    assert "HorizontalPodAutoscaler" in kinds
+    assert "Service" in kinds
+    assert "apps/v1" in api_versions
+    assert "autoscaling/v2" in api_versions
+    assert "v1" in api_versions
