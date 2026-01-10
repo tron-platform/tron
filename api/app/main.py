@@ -112,3 +112,8 @@ async def redoc_html():
         redoc_js_url="https://cdn.jsdelivr.net/npm/redoc@2.1.3/bundles/redoc.standalone.js",
         redoc_favicon_url="https://fastapi.tiangolo.com/img/favicon.png",
     )
+
+@app.get("/health", include_in_schema=False)
+async def health_check():
+    """Health check endpoint for container orchestration"""
+    return {"status": "healthy"}
