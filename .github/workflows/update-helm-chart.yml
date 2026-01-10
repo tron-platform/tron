@@ -1,0 +1,79 @@
+name: Update Helm Chart
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to update (e.g., 0.1.0)'
+        required: true
+        type: string
+  release:
+    types: [published]
+
+env:
+  CHARTS_REPO: grid-labs-tech/charts
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/tron
+
+jobs:
+  update-chart:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: read
+
+    steps:
+      - name: Checkout charts repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.CHARTS_REPO }}
+          token: ${{ secrets.GH_PAT }}
+          path: charts
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" == "release" ]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Updating chart to version: $VERSION"
+
+      - name: Update Chart.yaml
+        working-directory: charts/tron
+        run: |
+          # Update version in Chart.yaml
+          sed -i "s/^version:.*/version: ${{ steps.version.outputs.version }}/" Chart.yaml
+          # Update appVersion if needed
+          sed -i "s/^appVersion:.*/appVersion: \"${{ steps.version.outputs.version }}\"/" Chart.yaml
+
+      - name: Update values.yaml with image tags
+        working-directory: charts/tron
+        run: |
+          # Update API image tag
+          sed -i "s|repository:.*tron-api|repository: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api|" values.yaml
+          sed -i "s|tag:.*|tag: \"${{ steps.version.outputs.version }}\"|" values.yaml || \
+          sed -i "/repository:.*tron-api/a\  tag: \"${{ steps.version.outputs.version }}\"" values.yaml
+          
+          # Update Portal image tag
+          sed -i "s|repository:.*tron-portal|repository: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-portal|" values.yaml
+          sed -i "/repository:.*tron-portal/a\  tag: \"${{ steps.version.outputs.version }}\"" values.yaml || \
+          sed -i "s|tag:.*|tag: \"${{ steps.version.outputs.version }}\"|" values.yaml
+
+      - name: Package chart
+        working-directory: charts/tron
+        run: |
+          helm package .
+          helm repo index . --url https://grid-labs-tech.github.io/charts
+
+      - name: Commit and push changes
+        working-directory: charts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git commit -m "chore: update tron chart to version ${{ steps.version.outputs.version }}" || exit 0
+          git push
