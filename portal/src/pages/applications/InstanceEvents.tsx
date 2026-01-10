@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AlertCircle, Clock } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { instancesApi, applicationsApi } from '../../services/api'
 import { Breadcrumbs } from '../../components/Breadcrumbs'
 import { PageHeader } from '../../components/PageHeader'
@@ -14,7 +14,7 @@ function InstanceEvents() {
     instanceUuid: string
   }>()
 
-  const { data: instance, isLoading: isLoadingInstance } = useQuery({
+  const { data: instance } = useQuery({
     queryKey: ['instances', instanceUuid],
     queryFn: () => instancesApi.get(instanceUuid!),
     enabled: !!instanceUuid,
