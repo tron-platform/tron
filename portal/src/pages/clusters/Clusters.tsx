@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Trash2, Plus, Cloud, Info, Edit, CheckCircle, XCircle } from 'lucide-react'
+import { X, Trash2, Plus, Info, Edit, CheckCircle, XCircle } from 'lucide-react'
 import { clustersApi, environmentsApi } from '../../services/api'
 import type { Cluster, ClusterCreate } from '../../types'
 import DataTable from '../../components/DataTable'
@@ -51,7 +51,7 @@ function Clusters() {
   })
 
   const updateMutation = useMutation({
-    mutationFn: clustersApi.update,
+    mutationFn: ({ uuid, data }: { uuid: string; data: Partial<ClusterCreate> }) => clustersApi.update(uuid, data),
     onSuccess: () => {
       setNotification({ type: 'success', message: 'Cluster updated successfully' })
       queryClient.invalidateQueries({ queryKey: ['clusters'] })
