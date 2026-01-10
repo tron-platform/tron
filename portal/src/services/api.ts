@@ -37,7 +37,6 @@ import type {
   CronJobLogs,
   Pod,
   PodLogs,
-  PodCommandRequest,
   PodCommandResponse,
   DashboardOverview,
   KubernetesEvent,
