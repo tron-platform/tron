@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { X, Trash2, Plus, User as UserIcon, Edit, Mail, UserCheck, UserX, Shield } from 'lucide-react'
+import { X, Trash2, Plus, Edit, Mail, UserCheck, UserX, Shield } from 'lucide-react'
 import { usersApi } from '../../services/api'
 import type { User, UserCreate } from '../../types'
 import DataTable from '../../components/DataTable'
@@ -386,7 +386,7 @@ function Users() {
                 <input
                   id="full_name"
                   type="text"
-                  value={formData.full_name}
+                  value={formData.full_name || ''}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   className="input w-full"
                   placeholder="User name"
