@@ -285,8 +285,8 @@ function CronDetail() {
               label: 'Delete',
               icon: <Trash2 size={14} />,
               onClick: () => handleDeleteJob(job.name),
-              variant: 'danger' as const,
-            })
+              variant: 'danger',
+            } as any)
           }
 
           return actions

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Trash2, Plus, AppWindow, Layers, Server } from 'lucide-react'
+import { Trash2, Plus, Layers, Server } from 'lucide-react'
 import { applicationsApi, instancesApi } from '../../services/api'
 import type { Application, Instance } from '../../types'
 import DataTable from '../../components/DataTable'
@@ -197,8 +197,8 @@ function Applications() {
             label: 'Delete',
             icon: <Trash2 size={14} />,
             onClick: () => handleDelete(application.uuid),
-            variant: 'danger' as const,
-          })
+            variant: 'danger',
+          } as any)
 
           return actions
         }}
