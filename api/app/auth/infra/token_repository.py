@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from typing import Optional, List
 from uuid import UUID
 from app.auth.infra.token_model import Token as TokenModel
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class TokenRepository:
@@ -49,5 +49,5 @@ class TokenRepository:
 
     def update_last_used(self, token: TokenModel) -> None:
         """Update token last_used_at timestamp."""
-        token.last_used_at = datetime.utcnow()
+        token.last_used_at = datetime.now(timezone.utc)
         self.db.commit()

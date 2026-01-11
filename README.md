@@ -1,5 +1,8 @@
 # Tron - Platform as a Service
 
+[![Tests](https://github.com/tron-platform/tron/actions/workflows/tests.yml/badge.svg)](https://github.com/tron-platform/tron/actions/workflows/tests.yml)
+[![codecov](https://codecov.io/gh/tron-platform/tron/branch/main/graph/badge.svg)](https://codecov.io/gh/tron-platform/tron)
+
 An Internal Developer Platform that simplifies application delivery on Kubernetes by providing a clean abstraction for workloads, networking, scaling, and exposure.
 
 ## 📸 Platform Overview

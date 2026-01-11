@@ -38,6 +38,7 @@ pydantic-settings==2.5.2
 pydantic_core==2.23.4
 Pygments==2.18.0
 pytest==8.3.3
+pytest-cov==4.1.0
 pytest-mock==3.14.0
 python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
@@ -60,5 +61,5 @@ uvicorn==0.32.0
 watchfiles==0.24.0
 websocket-client==1.8.0
 websockets==13.1
-python-jose[cryptography]==3.3.0
+python-jose[cryptography]==3.5.0
 bcrypt==4.1.2

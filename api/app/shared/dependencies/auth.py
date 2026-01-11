@@ -2,7 +2,7 @@ from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from typing import Optional, Union
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 from app.shared.database.database import get_db
 from app.users.infra.user_model import User, UserRole
@@ -43,7 +43,7 @@ async def get_current_user_or_token(
             )
 
         # Verificar expiração
-        if token.expires_at and token.expires_at < datetime.utcnow():
+        if token.expires_at and token.expires_at < datetime.now(timezone.utc):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token expirado"

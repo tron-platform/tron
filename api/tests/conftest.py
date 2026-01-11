@@ -1,4 +1,5 @@
 import pytest
+import warnings
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest.mock import MagicMock
@@ -17,6 +18,15 @@ from app.users.infra.user_model import User
 from app.auth.infra.token_model import Token
 from app.templates.infra.template_model import Template
 from app.templates.infra.component_template_config_model import ComponentTemplateConfig
+
+# Suppress deprecation warnings from python-jose library
+# This is a known issue in the library and will be fixed in a future version
+warnings.filterwarnings(
+    "ignore",
+    message="datetime.datetime.utcnow() is deprecated",
+    category=DeprecationWarning,
+    module="jose"
+)
 
 @pytest.fixture()
 def mock_db():

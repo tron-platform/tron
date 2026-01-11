@@ -437,3 +437,43 @@ def test_sync_instance_with_errors(instance_service, mock_repository, mock_db):
         assert len(result["errors"]) == 1
         assert result["errors"][0]["component"] == "webapp-1"
         assert "error" in result["errors"][0]
+
+
+def test_update_instance_partial(instance_service, mock_repository):
+    """Test partial instance update."""
+    instance_uuid = uuid4()
+    dto = InstanceUpdate(version="2.0.0")  # Only update version
+
+    mock_instance = MagicMock()
+    mock_instance.uuid = instance_uuid
+    mock_instance.image = "nginx"
+    mock_instance.version = "1.0.0"
+    mock_instance.enabled = True
+
+    updated_instance = MagicMock()
+    updated_instance.uuid = instance_uuid
+
+    mock_repository.find_by_uuid.return_value = mock_instance
+    mock_repository.update.return_value = updated_instance
+
+    result = instance_service.update_instance(instance_uuid, dto)
+
+    assert result == updated_instance
+    assert mock_instance.version == dto.version
+    # Image should not be updated
+    mock_repository.update.assert_called_once()
+
+
+def test_get_instances(instance_service, mock_repository):
+    """Test getting all instances."""
+    mock_instance1 = MagicMock()
+    mock_instance1.uuid = uuid4()
+    mock_instance2 = MagicMock()
+    mock_instance2.uuid = uuid4()
+
+    mock_repository.find_all.return_value = [mock_instance1, mock_instance2]
+
+    result = instance_service.get_instances(skip=0, limit=10)
+
+    assert len(result) == 2
+    mock_repository.find_all.assert_called_once_with(skip=0, limit=10, load_components=True)
