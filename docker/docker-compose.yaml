@@ -87,6 +87,13 @@ services:
     volumes:
       - ${PWD}/api:/app
 
+  portal-test:
+    image: portal
+    volumes:
+      - ${PWD}/portal:/app
+      - /app/node_modules
+    command: npm run test
+
   k3s-server:
     image: "rancher/k3s:${K3S_VERSION:-latest}"
     command: server --https-listen-port 5443

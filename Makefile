@@ -17,11 +17,23 @@ api-migration:
 api-test:
 	@docker compose -f docker/docker-compose.yaml run --rm api-test
 
-portal-migration:
-	@docker compose -f docker/docker-compose.yaml run --rm portal sh -c 'python manage.py makemigrations'
+portal-test:
+	@docker compose -f docker/docker-compose.yaml run --rm portal-test
 
-portal-migrate:
-	@docker compose -f docker/docker-compose.yaml run --rm portal sh -c 'python manage.py migrate portal'
+test:
+	@echo "========================================="
+	@echo "Running API tests..."
+	@echo "========================================="
+	@make api-test
+	@echo ""
+	@echo "========================================="
+	@echo "Running Portal tests..."
+	@echo "========================================="
+	@make portal-test
+	@echo ""
+	@echo "========================================="
+	@echo "All tests completed!"
+	@echo "========================================="
 
 build:
 	@docker compose -f docker/docker-compose.yaml build
