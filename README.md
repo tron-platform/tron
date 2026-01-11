@@ -1,6 +1,6 @@
 # Tron - Platform as a Service
 
-[![Tests](https://github.com/tron-platform/tron/actions/workflows/tests.yml/badge.svg)](https://github.com/tron-platform/tron/actions/workflows/tests.yml)
+[![Tests](https://github.com/grid-labs-tech/tron/actions/workflows/tests.yml/badge.svg)](https://github.com/grid-labs-tech/tron/actions/workflows/tests.yml)
 
 An Internal Developer Platform that simplifies application delivery on Kubernetes by providing a clean abstraction for workloads, networking, scaling, and exposure.
 
