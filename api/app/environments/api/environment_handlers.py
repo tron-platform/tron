@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from uuid import UUID
 
 from app.shared.database.database import get_db
@@ -36,6 +37,10 @@ def create_environment(
     """Create a new environment."""
     try:
         return service.create_environment(environment)
+    except IntegrityError as e:
+        # Handle unique constraint violations (e.g., duplicate name)
+        service.repository.rollback()
+        raise HTTPException(status_code=400, detail="Environment with this name already exists")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -52,6 +57,10 @@ def update_environment(
         return service.update_environment(uuid, environment)
     except EnvironmentNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except IntegrityError as e:
+        # Handle unique constraint violations (e.g., duplicate name)
+        service.repository.rollback()
+        raise HTTPException(status_code=400, detail="Environment with this name already exists")
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

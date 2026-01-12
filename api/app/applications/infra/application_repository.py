@@ -53,7 +53,13 @@ class ApplicationRepository:
 
     def update(self, application: ApplicationModel) -> ApplicationModel:
         """Update an existing application."""
+        # Ensure created_at is not modified during update
+        # Store original created_at to prevent SQLAlchemy from trying to update it
+        original_created_at = application.created_at
         self.db.commit()
+        # Restore created_at in case it was modified
+        if hasattr(application, 'created_at') and application.created_at != original_created_at:
+            application.created_at = original_created_at
         self.db.refresh(application)
         return application
 
